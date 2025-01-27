@@ -117,12 +117,12 @@ if command -v vim &>/dev/null; then
 		reinstall="y"  # Default to deleting in quiet mode
 	fi
 
-	if [[ $reinstall != "y" && $reinstall != "Y" ]]; then
-		log "Closing the script due to user order to not compile vim again"
-		exit 0
-	else
+	if [[ $reinstall = "y" || $reinstall = "Y" ]]; then
 		log "removing vim from system"
 		$purge_cmd vim vim-gtk3 vim-runtime gvim vim-tiny vim-common vim-gui-common
+	else
+		log "Closing the script due to user order to not compile vim again"
+		exit 0
 	fi
 
 fi
@@ -219,7 +219,7 @@ else
 fi
 
 # Clean up the Vim source directory
-if [[ $keep_source != "y" && $keep_source != "Y" ]]; then
+if [[ $keep_source != "y" || $keep_source != "Y" ]]; then
 	log "Cleaning up Vim source directory..."
 	cd ..
 	rm -rf vim

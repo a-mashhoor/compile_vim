@@ -128,9 +128,40 @@ if command -v vim &>/dev/null; then
 fi
 
 log "Cloning vim in a while loop until the clone is finished"
-while ! -d vim; do
-	git clone https://github.com/vim/vim.git vim
-done
+
+
+# Function to clone the repository
+clone_repo() {
+
+	# Variables
+	local MAX_ATTEMPTS=20
+	local ATTEMPT=0
+	# Retry logic using a do-while loop (bash do not support do-while so we are making one!)
+	while true; do
+		log "Attempting to clone repository (Attempt $ATTEMPT of $MAX_ATTEMPTS)..."
+		git clone "$@"
+
+	    # Check the exit status of the git clone command
+	    if [ $? -eq 0 ]; then
+		    log "Repository cloned successfully!"
+		    break  # Exit with success
+	    else
+		    log "Failed to clone repository. Retrying..."
+		    ATTEMPT=$((ATTEMPT + 1))
+		    if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+			    echo "Failed to clone repository after $MAX_ATTEMPTS attempts."
+			    exit 1  # Exit with failure
+		    fi
+		    sleep 0.5 # Wait for 5 seconds before retrying
+	    fi
+    done
+}
+
+if [[ ! -d vim ]];then
+	clone_repo https://github.com/vim/vim.git vim
+else
+	log "Source Code aleardy exists"
+fi
 
 log "change directory to vim or exit"
 cd vim || exit

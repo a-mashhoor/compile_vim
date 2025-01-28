@@ -45,7 +45,7 @@ case $OS in
 				dependencies=(
 					"libncurses5-dev" "libgtk2.0-dev" "libatk1.0-dev" "libcairo2-dev"
 					"libx11-dev" "libxpm-dev" "libxt-dev" "python3-dev" "ruby-dev"
-					"mercurial" "sed" "awk" "curl" "make"
+					"mercurial" "sed" "gawk" "curl" "make"
 				)
 				;;
 			arch*)
@@ -55,7 +55,7 @@ case $OS in
 				install_CMD="pacman -S --noconfirm"
 				dependencies=(
 					"ncurses" "gtk2" "atk" "cairo" "libx11" "libxpm" "libxt"
-					"python" "ruby" "mercurial" "sed" "awk" "curl" "make"
+					"python" "ruby" "mercurial" "sed" "gawk" "curl" "make"
 				)
 				;;
 			rhel*)
@@ -66,7 +66,7 @@ case $OS in
 				dependencies=(
 					"ncurses-devel" "gtk2-devel" "atk-devel" "cairo-devel"
 					"libX11-devel" "libXpm-devel" "libXt-devel" "python3-devel"
-					"ruby-devel" "mercurial" "sed" "awk" "curl" "make"
+					"ruby-devel" "mercurial" "sed" "gawk" "curl" "make"
 				)
 				;;
 			*)
@@ -80,7 +80,7 @@ case $OS in
 		update_CMD="brew update"
 		install_CMD="brew install"
 		dependencies=(
-			"ncurses" "gtk+" "atk" "cairo" "python@3" "ruby" "mercurial" "sed" "awk" "curl" "make"
+			"ncurses" "gtk+" "atk" "cairo" "python@3" "ruby" "mercurial" "sed" "gawk" "curl" "make"
 		)
 		;;
 	*)
@@ -124,12 +124,9 @@ if command -v vim &>/dev/null; then
 		log "Closing the script due to user order to not compile vim again"
 		exit 0
 	fi
-
 fi
 
 log "Cloning vim in a while loop until the clone is finished"
-
-
 # Function to clone the repository
 clone_repo() {
 
@@ -168,6 +165,7 @@ cd vim || exit
 
 log "Installing dependencies"
 
+sleep 1
 
 # Installing dependencies
 $install_CMD "${dependencies[@]}"
@@ -186,6 +184,7 @@ fi
 
 # my custom config for compiling vim
 log "configuring VIM"
+sleep 1
 ./configure --with-features=huge \
 	--enable-multibyte \
 	--with-x \
@@ -203,7 +202,7 @@ log "configuring VIM"
 
 # building and installing vim
 echo Building and installing VIM
-
+sleep 1
 max_retries=3
 retry_count=0
 
@@ -223,7 +222,7 @@ if [[ $retry_count -eq $max_retries ]]; then
 	echo "Error: Vim build failed after $max_retries attempts. Exiting."
 	exit 1
 fi
-
+sleep 1
 make install
 
 # Detect the actual user's home directory
@@ -236,10 +235,11 @@ fi
 log "Setting up Vim directories for $USER_HOME..."
 
 # Creating vim related directories for user
-mkdir -p "$USER_HOME/.vim/{backup,colors,plugged}"
+mkdir -p $USER_HOME/.vim/{backup,colors,plugged}
 
+log "installing the Plug Pluggin manager"
 # vim plug
-curl -fLo "$USER_HOME/.vim/autoload/plug.vim" --create-dirs \
+curl -fLos "$USER_HOME/.vim/autoload/plug.vim" --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Ask the user if they want to keep the Vim source code
@@ -250,7 +250,7 @@ else
 fi
 
 # Clean up the Vim source directory
-if [[ $keep_source != "y" || $keep_source != "Y" ]]; then
+if [[ $keep_source != "y" ]] || [[ $keep_source != "Y" ]]; then
 	log "Cleaning up Vim source directory..."
 	cd ..
 	rm -rf vim

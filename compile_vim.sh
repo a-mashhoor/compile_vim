@@ -37,7 +37,7 @@ case $OS in
 		log "OS is LINUX!"
 		source /etc/os-release
 		case $ID_LIKE in
-			debian)
+			*debian*)
 				log "OS is Debian-based selecting apt as package manager"
 				purge_cmd="apt purge -y"
 				update_CMD="apt update -y"
